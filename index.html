@@ -1,235 +1,636 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة الدفع | Z Point</title>
-    <!-- استدعاء خط Cairo للغة العربية -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* إعدادات عامة */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Cairo', sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#07070d">
+<title>بوابة الدفع | Z Point</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   1) الأساسيات
+========================================================= */
+*{box-sizing:border-box;margin:0;padding:0}
 
-        body {
-            background-color: #121212; /* خلفية داكنة وأنيقة */
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
+:root{
+  --bg:#07070d;
+  --text:#f3f4f9;
+  --muted:#8f96ab;
+  --stroke:rgba(255,255,255,.08);
+  --ok:#22c55e;
+  --insta-1:#b06bff; --insta-2:#6d28d9;
+  --etis-1:#a3e635;  --etis-2:#4d7c0f;
+  --vf-1:#ff5a5a;    --vf-2:#b91c1c;
+}
 
-        /* الحاوية الرئيسية */
-        .container {
-            background-color: #1e1e1e;
-            border-radius: 20px;
-            padding: 40px 30px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            border: 1px solid #333;
-        }
+html,body{height:100%}
 
-        /* منطقة الهيدر والاسم */
-        .header {
-            margin-bottom: 30px;
-        }
+body{
+  font-family:'Cairo',system-ui,-apple-system,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:20px;
+  padding:28px 18px calc(28px + env(safe-area-inset-bottom));
+  overflow-x:hidden;
+  position:relative;
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+}
 
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
-            color: #f3f3f3;
-        }
+/* =========================================================
+   2) الخلفية المتحركة (Orbs + Grid)
+========================================================= */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 
-        .header p {
-            color: #aaaaaa;
-            font-size: 14px;
-        }
+.orb{position:absolute;border-radius:50%;filter:blur(90px);will-change:transform}
+.orb.a{width:min(75vw,430px);aspect-ratio:1;background:#7c3aed;top:-12%;right:-16%;opacity:.5;animation:drift1 16s ease-in-out infinite}
+.orb.b{width:min(65vw,380px);aspect-ratio:1;background:#0ea5e9;bottom:-16%;left:-20%;opacity:.32;animation:drift2 21s ease-in-out infinite}
+.orb.c{width:min(55vw,320px);aspect-ratio:1;background:#ef4444;bottom:18%;right:-22%;opacity:.16;animation:drift3 18s ease-in-out infinite}
 
-        /* عرض درجة الحرارة */
-        .temp-display {
-            background-color: #2a2a2a;
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 14px;
-            margin-top: 10px;
-            color: #00d2ff;
-            border: 1px solid #00d2ff;
-        }
+@keyframes drift1{
+  0%,100%{transform:translate3d(0,0,0) scale(1)}
+  50%    {transform:translate3d(-40px,50px,0) scale(1.12)}
+}
+@keyframes drift2{
+  0%,100%{transform:translate3d(0,0,0) scale(1)}
+  50%    {transform:translate3d(50px,-45px,0) scale(1.15)}
+}
+@keyframes drift3{
+  0%,100%{transform:translate3d(0,0,0) scale(1)}
+  50%    {transform:translate3d(-30px,-35px,0) scale(1.2)}
+}
 
-        /* تنسيق الأزرار */
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s ease, opacity 0.2s ease;
-            color: #ffffff;
-        }
+.grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:46px 46px;
+  -webkit-mask-image:radial-gradient(circle at 50% 38%,#000 0%,transparent 78%);
+          mask-image:radial-gradient(circle at 50% 38%,#000 0%,transparent 78%);
+}
 
-        .btn:active {
-            transform: scale(0.96);
-        }
+/* =========================================================
+   3) الكارت الرئيسي
+========================================================= */
+.card{
+  position:relative;
+  z-index:2;
+  width:100%;
+  max-width:440px;
+  padding:30px 22px 26px;
+  border-radius:28px;
+  border:1px solid var(--stroke);
+  background:linear-gradient(180deg,rgba(32,32,48,.82),rgba(14,14,24,.92));
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  box-shadow:
+    0 40px 90px -30px rgba(0,0,0,.95),
+    0 0 0 1px rgba(255,255,255,.02) inset,
+    0 1px 0 rgba(255,255,255,.07) inset;
+  animation:cardIn .85s cubic-bezier(.2,.85,.25,1) both;
+  overflow:hidden;
+}
 
-        .btn-instapay {
-            background: linear-gradient(135deg, #6c1b73, #43114a); /* ألوان قريبة من إنستا باي */
-            box-shadow: 0 4px 15px rgba(108, 27, 115, 0.4);
-        }
+/* خط نيون علوي */
+.card::before{
+  content:'';
+  position:absolute;
+  top:0;left:12%;right:12%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(168,85,247,.9),rgba(56,189,248,.8),transparent);
+  filter:blur(.5px);
+}
 
-        .btn-vfcash {
-            background: linear-gradient(135deg, #e60000, #990000); /* ألوان فودافون */
-            box-shadow: 0 4px 15px rgba(230, 0, 0, 0.4);
-        }
+/* بقعة ضوء تتبع الماوس */
+.card::after{
+  content:'';
+  position:absolute;inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  background:radial-gradient(300px circle at var(--mx,50%) var(--my,0%),rgba(139,92,246,.14),transparent 68%);
+  opacity:0;
+  transition:opacity .35s ease;
+}
+@media (hover:hover){ .card:hover::after{opacity:1} }
 
-        .btn .icon {
-            margin-left: 10px;
-            font-size: 20px;
-        }
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(28px) scale(.96)}
+  to  {opacity:1;transform:translateY(0) scale(1)}
+}
 
-        /* نافذة الإشعار المنبثقة (Toast) */
-        .toast {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: #4CAF50;
-            color: #fff;
-            text-align: center;
-            border-radius: 8px;
-            padding: 12px;
-            position: fixed;
-            z-index: 1;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 15px;
-            opacity: 0;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
+/* =========================================================
+   4) الهيدر
+========================================================= */
+.head{text-align:center;margin-bottom:24px;animation:fadeUp .7s .08s cubic-bezier(.2,.85,.25,1) both}
 
-        .toast.show {
-            visibility: visible;
-            opacity: 1;
-        }
-    </style>
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11.5px;font-weight:700;letter-spacing:.2px;
+  color:#b9f6ca;
+  background:rgba(34,197,94,.1);
+  border:1px solid rgba(34,197,94,.28);
+  padding:5px 12px;
+  border-radius:100px;
+  margin-bottom:14px;
+}
+.badge .dot{
+  width:6px;height:6px;border-radius:50%;background:#22c55e;
+  box-shadow:0 0 0 0 rgba(34,197,94,.7);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%  {box-shadow:0 0 0 0 rgba(34,197,94,.6)}
+  70% {box-shadow:0 0 0 7px rgba(34,197,94,0)}
+  100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}
+}
+
+.head h1{
+  font-size:26px;
+  font-weight:800;
+  line-height:1.35;
+  background:linear-gradient(100deg,#ffffff 10%,#c4b5fd 55%,#7dd3fc 95%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+.head .sub{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:7px;
+  line-height:1.7;
+}
+
+/* =========================================================
+   5) أزرار طرق الدفع
+========================================================= */
+.methods{display:flex;flex-direction:column;gap:12px}
+
+.method{
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  width:100%;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.028);
+  color:var(--text);
+  font-family:inherit;
+  text-align:right;
+  cursor:pointer;
+  transition:transform .28s cubic-bezier(.2,.85,.25,1),
+             border-color .28s ease,
+             background .28s ease,
+             box-shadow .28s ease;
+  animation:fadeUp .65s cubic-bezier(.2,.85,.25,1) both;
+}
+.method:nth-of-type(1){animation-delay:.16s}
+.method:nth-of-type(2){animation-delay:.24s}
+.method:nth-of-type(3){animation-delay:.32s}
+
+@media (hover:hover){
+  .method:hover{
+    transform:translateY(-3px);
+    background:rgba(255,255,255,.055);
+    border-color:color-mix(in srgb,var(--c1) 55%,transparent);
+    box-shadow:0 16px 34px -18px var(--c1);
+  }
+}
+.method:active{transform:scale(.975)}
+.method:focus-visible{outline:2px solid var(--c1);outline-offset:3px}
+
+/* لمعة تمر عند المرور */
+.method::before{
+  content:'';
+  position:absolute;
+  top:-20%;bottom:-20%;
+  width:55%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.13),transparent);
+  transform:translateX(-190%) skewX(-18deg);
+  transition:transform .75s cubic-bezier(.3,.7,.3,1);
+  pointer-events:none;
+}
+@media (hover:hover){ .method:hover::before{transform:translateX(290%) skewX(-18deg)} }
+
+/* الأيقونة */
+.ico{
+  flex:0 0 46px;
+  width:46px;height:46px;
+  display:grid;place-items:center;
+  border-radius:14px;
+  color:#fff;
+  background:linear-gradient(140deg,var(--c1),var(--c2));
+  box-shadow:0 10px 22px -10px var(--c1), inset 0 1px 0 rgba(255,255,255,.35);
+  transition:transform .35s cubic-bezier(.2,.9,.3,1.4);
+}
+.ico svg{width:22px;height:22px}
+@media (hover:hover){ .method:hover .ico{transform:scale(1.09) rotate(-5deg)} }
+
+/* النصوص */
+.txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.t{font-size:15.5px;font-weight:700;line-height:1.3}
+.s{font-size:12px;color:var(--muted);line-height:1.45}
+
+/* أيقونة السهم / النسخ */
+.go{
+  flex:0 0 auto;
+  width:30px;height:30px;
+  display:grid;place-items:center;
+  border-radius:10px;
+  color:var(--muted);
+  background:rgba(255,255,255,.05);
+  transition:transform .3s ease,color .3s ease,background .3s ease;
+}
+.go svg{width:16px;height:16px}
+@media (hover:hover){
+  .method:hover .go{color:#fff;background:rgba(255,255,255,.12);transform:translateX(-4px)}
+}
+
+/* حالة "تم النسخ" */
+.method.copied{
+  border-color:rgba(34,197,94,.6);
+  background:rgba(34,197,94,.09);
+}
+.method.copied .go{color:#22c55e;background:rgba(34,197,94,.16);transform:none}
+.method.copied .ico{background:linear-gradient(140deg,#22c55e,#15803d);box-shadow:0 10px 22px -10px #22c55e}
+
+/* تأثير الموجة عند الضغط */
+.ripple{
+  position:absolute;
+  border-radius:50%;
+  background:rgba(255,255,255,.3);
+  transform:scale(0);
+  animation:rippleAnim .62s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes rippleAnim{to{transform:scale(1);opacity:0}}
+
+/* =========================================================
+   6) التذييل
+========================================================= */
+.foot{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  color:#767d92;
+  animation:fadeUp .7s .42s cubic-bezier(.2,.85,.25,1) both;
+}
+.wa{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 13px 6px 11px;
+  border-radius:100px;
+  font-size:13px;
+  font-weight:700;
+  color:#d6ffe4;
+  text-decoration:none;
+  background:rgba(37,211,102,.1);
+  border:1px solid rgba(37,211,102,.3);
+  transition:transform .25s ease,background .25s ease,box-shadow .25s ease;
+}
+.wa svg{width:15px;height:15px;fill:currentColor}
+@media (hover:hover){
+  .wa:hover{
+    transform:translateY(-2px);
+    background:rgba(37,211,102,.2);
+    box-shadow:0 10px 22px -12px #25d366;
+  }
+}
+.wa:active{transform:scale(.95)}
+
+/* =========================================================
+   7) الإشعار (Toast)
+========================================================= */
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:calc(26px + env(safe-area-inset-bottom));
+  z-index:99;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:230px;
+  padding:12px 16px;
+  border-radius:16px;
+  background:rgba(18,22,30,.94);
+  border:1px solid rgba(34,197,94,.35);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:0 24px 50px -16px rgba(0,0,0,.95);
+  overflow:hidden;
+  opacity:0;
+  transform:translate(-50%,150%);
+  transition:transform .5s cubic-bezier(.2,.9,.25,1.25),opacity .3s ease;
+  pointer-events:none;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.toast-ico{
+  flex:0 0 26px;
+  width:26px;height:26px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:linear-gradient(140deg,#22c55e,#15803d);
+  color:#fff;
+}
+.toast-ico svg{width:14px;height:14px}
+
+.toast-msg{font-size:13.5px;font-weight:700;white-space:nowrap;color:#eafff2}
+
+.toast-bar{
+  position:absolute;
+  bottom:0;right:0;
+  height:3px;
+  width:100%;
+  background:linear-gradient(90deg,#22c55e,#4ade80);
+}
+.toast.show .toast-bar{animation:barRun 3s linear forwards}
+@keyframes barRun{from{width:100%}to{width:0}}
+
+/* =========================================================
+   8) حركات عامة + استجابة الشاشات
+========================================================= */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(18px)}
+  to  {opacity:1;transform:translateY(0)}
+}
+
+@media (max-width:380px){
+  .card{padding:24px 16px 20px;border-radius:24px}
+  .head h1{font-size:22px}
+  .ico{flex-basis:42px;width:42px;height:42px;border-radius:12px}
+  .ico svg{width:20px;height:20px}
+  .t{font-size:14.5px}
+  .s{font-size:11.5px}
+  .method{padding:12px;gap:11px}
+}
+
+/* احترام تفضيل تقليل الحركة */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+}
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <h1 id="uiBrandName">الاسم</h1>
-            <p id="uiDescription">اختر طريقة الدفع المناسبة لك</p>
-            <!-- قسم درجة الحرارة -->
-            <div id="uiTemp" class="temp-display" style="display: none;">
-                درجة الحرارة: <span id="tempValue"></span>
-            </div>
-        </div>
+<!-- ===== الخلفية المتحركة ===== -->
+<div class="bg" aria-hidden="true">
+  <div class="orb a"></div>
+  <div class="orb b"></div>
+  <div class="orb c"></div>
+  <div class="grid"></div>
+</div>
 
-        <div class="buttons">
-            <button id="btnInstapay" class="btn btn-instapay">
-                <span class="icon">🔗</span> الدفع عبر إنستا باي
-            </button>
-            <button id="btnVfcash" class="btn btn-vfcash">
-                <span class="icon">📱</span> نسخ رقم فودافون كاش
-            </button>
-        </div>
-    </div>
+<!-- ===== الكارت الرئيسي ===== -->
+<main class="card">
 
-    <!-- إشعار النسخ -->
-    <div id="toast" class="toast">تم نسخ الرقم بنجاح!</div>
+  <header class="head">
+    <div class="badge"><span class="dot"></span> دفع آمن ومشفّر</div>
+    <h1 id="uiMainTitle">اختر وسيلة الدفع</h1>
+    <p class="sub">اختر الطريقة الأنسب لك وأكمل عملية الدفع في ثوانٍ</p>
+  </header>
 
-    <script>
-        /* =========================================
-           منطقة الإعدادات - عدل بياناتك هنا فقط
-        ========================================= */
-        const CONFIG = {
-            brandName: "Z Point", // اسم المتجر أو صفحتك
-            description: "اختر طريقة الدفع المناسبة لك", // الوصف أسفل الاسم
-            
-            // روابط الدفع والأرقام
-            instapayLink: "https://instapay.eg/your-link", // ضع رابط إنستا باي الخاص بك هنا
-            vfcashNumber: "01000000000", // ضع رقم فودافون كاش هنا
-            
-            // إعدادات درجة الحرارة (أو أي قيمة رقمية أخرى)
-            showTemperature: true, // اجعلها false إذا أردت إخفاء قسم درجة الحرارة
-            temperatureValue: "24°C" // القيمة التي ستظهر (يمكنك تحديثها برمجياً لاحقاً)
-        };
-        /* ========================================= */
+  <div class="methods">
 
-        // 1. تطبيق الإعدادات على واجهة المستخدم (DOM)
-        document.getElementById('uiBrandName').textContent = CONFIG.brandName;
-        document.getElementById('uiDescription').textContent = CONFIG.description;
-        
-        // معالجة عرض درجة الحرارة
-        if (CONFIG.showTemperature) {
-            document.getElementById('uiTemp').style.display = 'inline-block';
-            document.getElementById('tempValue').textContent = CONFIG.temperatureValue;
-        }
+    <!-- إنستا باي -->
+    <button class="method" id="btnInstapay" style="--c1:var(--insta-1);--c2:var(--insta-2)"
+            aria-label="الدفع عبر إنستا باي">
+      <span class="ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+      </span>
+      <span class="txt">
+        <span class="t">إنستا باي</span>
+        <span class="s">تحويل فوري ومباشر من تطبيق بنكك</span>
+      </span>
+      <span class="go">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+             stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </span>
+    </button>
 
-        // 2. تفعيل زر إنستا باي (تحويل مباشر)
-        document.getElementById('btnInstapay').addEventListener('click', () => {
-            if (CONFIG.instapayLink && CONFIG.instapayLink !== "") {
-                window.location.href = CONFIG.instapayLink;
-            } else {
-                alert("لم يتم تعيين رابط إنستا باي في الكود.");
-            }
-        });
+    <!-- اتصالات كاش -->
+    <button class="method" id="btnEtisalat" style="--c1:var(--etis-1);--c2:var(--etis-2)"
+            aria-label="الدفع عبر اتصالات كاش">
+      <span class="ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+          <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+          <circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <span class="txt">
+        <span class="t">اتصالات كاش</span>
+        <span class="s">ادفع من محفظتك الإلكترونية بأمان</span>
+      </span>
+      <span class="go">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+             stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </span>
+    </button>
 
-        // 3. تفعيل زر فودافون كاش (نسخ الرقم للحافظة)
-        document.getElementById('btnVfcash').addEventListener('click', () => {
-            // استخدام واجهة Clipboard API الحديثة (تعمل بشكل مثالي على GitHub Pages لأنها تدعم HTTPS)
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(CONFIG.vfcashNumber).then(() => {
-                    showToast();
-                }).catch(err => {
-                    console.error("فشل النسخ: ", err);
-                    fallbackCopyText(CONFIG.vfcashNumber);
-                });
-            } else {
-                // طريقة بديلة للمتصفحات القديمة
-                fallbackCopyText(CONFIG.vfcashNumber);
-            }
-        });
+    <!-- فودافون كاش -->
+    <button class="method" id="btnVfcash" style="--c1:var(--vf-1);--c2:var(--vf-2)"
+            aria-label="نسخ رقم فودافون كاش">
+      <span class="ico" id="vfIcon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="2" width="12" height="20" rx="3"/>
+          <line x1="10.5" y1="18" x2="13.5" y2="18"/>
+        </svg>
+      </span>
+      <span class="txt">
+        <span class="t">فودافون كاش</span>
+        <span class="s">
+          <span id="uiVfName"></span> · <bdi dir="ltr" id="uiVfNumber"></bdi>
+        </span>
+      </span>
+      <span class="go" id="vfGo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="12" height="12" rx="2.5"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+      </span>
+    </button>
 
-        // دالة بديلة لنسخ النص إذا فشلت الطريقة الحديثة
-        function fallbackCopyText(text) {
-            const tempInput = document.createElement("input");
-            tempInput.value = text;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            tempInput.setSelectionRange(0, 99999); // للهواتف المحمولة
-            try {
-                document.execCommand("copy");
-                showToast();
-            } catch (err) {
-                console.error("فشل النسخ بالطريقة البديلة", err);
-                alert("فشل النسخ التلقائي. الرقم هو: " + text);
-            }
-            document.body.removeChild(tempInput);
-        }
+  </div>
+</main>
 
-        // 4. إظهار إشعار بنجاح النسخ
-        function showToast() {
-            const toast = document.getElementById("toast");
-            toast.className = "toast show";
-            // إخفاء الإشعار بعد 3 ثوانٍ
-            setTimeout(() => {
-                toast.className = toast.className.replace("show", "");
-            }, 3000);
-        }
-    </script>
+<!-- ===== التذييل ===== -->
+<div class="foot">
+  <span>صنع بواسطة</span>
+  <a class="wa" id="waLink" href="#" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+    </svg>
+    Z Point
+  </a>
+</div>
+
+<!-- ===== الإشعار ===== -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <span class="toast-ico">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+         stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </span>
+  <span class="toast-msg" id="toastMsg">تم نسخ الرقم بنجاح</span>
+  <span class="toast-bar"></span>
+</div>
+
+<script>
+/* =========================================================
+   لوحة التحكم المركزية — عدّل كل شيء من هنا فقط
+========================================================= */
+const CONFIG = {
+    mainTitle: "اختر وسيلة الدفع",
+
+    // روابط الدفع
+    instapayLink: "https://ipn.eg/S/ahmedelnbtiti/instapay/7ipPYw",
+    etisalatLink: "https://flous.page.link/v5nK",
+
+    // بيانات فودافون كاش
+    vfcashNumber: "01026062223",
+    vfcashName: "احمد",
+
+    // رقم الواتساب (بكود الدولة بدون + أو أصفار)
+    developerPhone: "201032868412",
+
+    // مدة ظهور الإشعار بالملي ثانية
+    toastDuration: 3000
+};
+/* ========================================================= */
+
+/* ---------- 1) تعبئة النصوص والروابط ---------- */
+document.getElementById('uiMainTitle').textContent = CONFIG.mainTitle;
+document.getElementById('uiVfName').textContent    = CONFIG.vfcashName;
+document.getElementById('uiVfNumber').textContent  = CONFIG.vfcashNumber;
+document.getElementById('waLink').href = "https://wa.me/" + CONFIG.developerPhone;
+
+/* ---------- 2) بقعة الضوء التي تتبع الماوس ---------- */
+const card = document.querySelector('.card');
+card.addEventListener('pointermove', (e) => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+});
+
+/* ---------- 3) تأثير الموجة (Ripple) ---------- */
+function ripple(e, el) {
+    const r = el.getBoundingClientRect();
+    const size = Math.max(r.width, r.height) * 1.15;
+    const span = document.createElement('span');
+    span.className = 'ripple';
+    span.style.width = span.style.height = size + 'px';
+    span.style.left = (e.clientX - r.left - size / 2) + 'px';
+    span.style.top  = (e.clientY - r.top  - size / 2) + 'px';
+    el.appendChild(span);
+    setTimeout(() => span.remove(), 650);
+}
+
+/* ---------- 4) ربط الأزرار ---------- */
+const btnInstapay = document.getElementById('btnInstapay');
+const btnEtisalat = document.getElementById('btnEtisalat');
+const btnVfcash   = document.getElementById('btnVfcash');
+
+btnInstapay.addEventListener('click', (e) => {
+    ripple(e, btnInstapay);
+    setTimeout(() => { window.location.href = CONFIG.instapayLink; }, 180);
+});
+
+btnEtisalat.addEventListener('click', (e) => {
+    ripple(e, btnEtisalat);
+    setTimeout(() => { window.location.href = CONFIG.etisalatLink; }, 180);
+});
+
+btnVfcash.addEventListener('click', (e) => {
+    ripple(e, btnVfcash);
+    copyNumber();
+});
+
+/* ---------- 5) منطق النسخ ---------- */
+function copyNumber() {
+    const text = CONFIG.vfcashNumber;
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text)
+            .then(onCopySuccess)
+            .catch(() => fallbackCopy(text));
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+function fallbackCopy(text) {
+    const input = document.createElement('textarea');
+    input.value = text;
+    input.setAttribute('readonly', '');
+    input.style.cssText = 'position:absolute;left:-9999px;opacity:0';
+    document.body.appendChild(input);
+    input.select();
+    input.setSelectionRange(0, 99999);
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    document.body.removeChild(input);
+    if (ok) { onCopySuccess(); }
+    else { showToast('تعذّر النسخ — الرقم: ' + text, false); }
+}
+
+/* ---------- 6) حالة النجاح على الزر ---------- */
+const vfGo = document.getElementById('vfGo');
+const originalGoIcon = vfGo.innerHTML;
+let copyTimer = null;
+
+function onCopySuccess() {
+    showToast('تم نسخ الرقم بنجاح ✓', true);
+
+    btnVfcash.classList.add('copied');
+    vfGo.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+    clearTimeout(copyTimer);
+    copyTimer = setTimeout(() => {
+        btnVfcash.classList.remove('copied');
+        vfGo.innerHTML = originalGoIcon;
+    }, 1800);
+}
+
+/* ---------- 7) الإشعار ---------- */
+const toastEl  = document.getElementById('toast');
+const toastMsg = document.getElementById('toastMsg');
+let toastTimer = null;
+
+function showToast(msg, success) {
+    toastMsg.textContent = msg;
+    toastEl.style.borderColor = success ? 'rgba(34,197,94,.35)' : 'rgba(239,68,68,.4)';
+
+    toastEl.classList.remove('show');
+    void toastEl.offsetWidth;           // إعادة تشغيل الأنيميشن
+    toastEl.classList.add('show');
+
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), CONFIG.toastDuration);
+}
+</script>
 </body>
 </html>
